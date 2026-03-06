@@ -1,0 +1,13 @@
+-r requirements.txt
+pre-commit
+pylint
+torch
+tensorflow
+jax
+pillow
+tox
+pytest
+pytest-cov
+mypy
+flake8
+genbadge[all]

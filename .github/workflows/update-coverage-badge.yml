@@ -1,0 +1,75 @@
+name: Update code coverage badge
+
+on:
+  push:
+    branches:
+      main
+    paths:
+      - 'tensorhub/**'
+      - 'tests/**'
+  pull_request:
+    branches:
+      main
+    paths:
+      - 'tensorhub/**'
+      - 'tests/**'
+
+jobs:
+  update_coverage:
+    name: "Update coverage badge"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: "Install dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: "Run coverage and generate badge"
+        run: |
+          pytest .
+          coverage report
+          coverage xml
+          coverage html
+          genbadge coverage --input-file coverage.xml
+
+      - name: "Check if coverage-badge.svg Changed"
+        id: check_svg_change
+        run: |
+          if git diff --quiet -- exit-code -- coverage-badge.svg; then
+            echo "No changes in coverage-badge.svg"
+            echo "svg_changed=false" >> $GITHUB_ENV
+          else
+            echo "Changes detected in coverage-badge.svg"
+            echo "svg_changed=true" >> $GITHUB_ENV
+          fi
+
+      - name: "Commit and push changes"
+        if: env.svg_changed == 'true'
+        run: |
+          git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          if [[ "${{ github.event_name }}" == 'push' ]]; then
+            target_branch=$(echo "${{ github.ref }}" | awk -F'/' '{print $3}')
+          else
+            target_branch="${{ github.event.pull_request.head.ref }}"
+          fi
+
+          git fetch origin "${target_branch}:${target_branch}"
+          git checkout "${target_branch}" || git checkout -b "${target_branch}"
+          git push --set-upstream origin "${target_branch}"
+
+          git add coverage-badge.svg
+          git commit -m "gh-actions[bot]: update code coverage badge"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
