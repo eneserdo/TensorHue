@@ -90,6 +90,10 @@ class ColorScheme:
             false_values = np.array(self.false_color, dtype=np.uint8)
             return np.where(data[..., np.newaxis], true_values, false_values)
         data_noinf = np.where(np.isinf(data), np.nan, data)
+        if not np.isfinite(data_noinf).any():
+            masked = np.empty(data.shape + (3,), dtype=np.uint8)
+            masked[...] = np.array(self.masked_color, dtype=np.uint8)
+            return masked
         if "vmin" not in kwargs:
             vmin = np.nanmin(data_noinf)
         else:
