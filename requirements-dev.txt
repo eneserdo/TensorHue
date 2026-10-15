@@ -1,3 +1,4 @@
+# Development extras (the runtime needs only requirements.txt)
 -r requirements.txt
 pre-commit
 pylint

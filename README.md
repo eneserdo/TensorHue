@@ -124,3 +124,8 @@ conf_matrix.viz(vmin=0, vmax=1, scale=3)
 </div>
 
 The `scale` parameter scales up the 'pixels' of the tensor so that small tensors are easier to view.
+
+## Development
+
+`make test` runs the colour suite (the optional connectors have their own tests). `make lint` runs
+pylint. Both are what CI runs on a pull request.
