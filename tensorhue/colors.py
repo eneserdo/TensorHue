@@ -46,6 +46,13 @@ class ColorScheme:
             bad=self.masked_color.normalized, under=self.ninf_color.normalized, over=self.inf_color.normalized
         )
 
+    @classmethod
+    def from_name(cls, name: str, **kwargs) -> "ColorScheme":
+        """Build a scheme from a registered matplotlib colormap name."""
+        if name not in colormaps:
+            raise ValueError(f"unknown colormap {name!r}; try one of: magma, viridis, plasma")
+        return cls(colormap=colormaps[name], **kwargs)
+
     @property
     def colormap(self):
         return self._colormap
