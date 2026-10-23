@@ -32,7 +32,9 @@ class ColorScheme:
         inf_color: ColorTriplet = COLORS["white"],
         ninf_color: ColorTriplet = COLORS["black"],
     ):
-        self._colormap = colormap
+        # `colormaps[...]` returns the shared registry instance; copy before
+        # `set_extremes` mutates it.
+        self._colormap = colormap.copy()
         self.normalize = normalize
         self._masked_color = masked_color
         self.true_color = true_color
@@ -50,7 +52,7 @@ class ColorScheme:
 
     @colormap.setter
     def colormap(self, value):
-        self._colormap = value
+        self._colormap = value.copy()
         self._colormap.set_extremes(
             bad=self._masked_color.normalized, under=self._ninf_color.normalized, over=self._inf_color.normalized
         )
